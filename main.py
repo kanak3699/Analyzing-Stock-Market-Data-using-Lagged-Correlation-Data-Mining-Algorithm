@@ -1,60 +1,52 @@
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import os
 from glob import glob
 import csv
 
-
-clean_data_location = "/Users/kanakprajapati/Downloads/CSCI 4144 - Data Warehousing/Data-Mining-to-analyze-stock-market-data-using-Lagged-Correlation/data/cleanData/"
-output_location = "/Users/kanakprajapati/Downloads/CSCI 4144 - Data Warehousing/Data-Mining-to-analyze-stock-market-data-using-Lagged-Correlation/data/output/"
-# arr = np.zeros((len(stocks)))
-# print(stocks) # The sequence of file reading
-
 # Data Cleaning
 def cleanData():
+
 
     os.chdir("data/top10")
     stocks = glob("*.csv")
     for i in range(len(stocks) - 1):
-        #     df = pd.read_csv(i, parse_dates=['Date'], index_col='Date')
-        # index 0 = Date and index 5 = Close |  Date and Close Price Columns
-        if i == 0:
-            data1 = pd.read_csv(stocks[i])
-        else:
-            data1 = output1
 
-        data2 = pd.read_csv(stocks[i + 1])
+        if i == 0:
+            file1_Data = pd.read_csv(stocks[i])
+        else:
+            file1_Data = output
+
+        file2_Data = pd.read_csv(stocks[i + 1])
 
         # using merge function by setting how='inner'
-        output1 = pd.merge(data1, data2,
-                           on='Date',
-                           how='inner')
+        output = pd.merge(file1_Data, file2_Data, on='Date', how='inner')
 
-    df = pd.DataFrame(output1["Date"])
+    df = pd.DataFrame(output["Date"])
 
     for i in range(len(stocks)):
-        data = pd.read_csv(stocks[i])
-        final_output = pd.merge(data, df, on="Date", how="inner")
-
-        st =  clean_data_location + 'Output_' + stocks[i]
-
+        os.chdir("../top10")
+        file_data = pd.read_csv(stocks[i])
+        final_output = pd.merge(file_data, df, on="Date", how="inner")
+        os.chdir("../cleanData")
+        st = 'Output_' + stocks[i]
         final_output.to_csv(st, index=False)
 
+    print("Data has been cleaned and stored in the cleanData directory")
 
 
 def corelation():
     # User Input
+    print("Finding correlation between the stocks")
 
     K = int(input("Enter lag number: "))
     R = float(input("Enter R number: "))
 
     # Algorithm
     m = 0
-    header = ['Company A', 'Company B', 'Co-relation']
+    header = ['Company A', 'Company B', 'Co-relation','Trend']
 
-    output_file = output_location + 'final_output.csv'
-    f = open(output_file, 'w+')
+    os.chdir("../output")
+    f = open('final_output.csv', 'w+')
 
     os.chdir("../cleanData")
     stocks = glob("*.csv")
@@ -64,26 +56,42 @@ def corelation():
             data2 = pd.read_csv(stocks[j])
             data1 = data1["Adjusted Close"]
             data2 = data2["Adjusted Close"]
-            data1 = data1[:K]
-            data2 = data2[:K]
-            data1 = data1.squeeze()
-            data2 = data2.squeeze()
-            r = data1.corr(data2, method='pearson')
-            l = []
-            if r > R or r < -R:
-                m = m + 1
-                #splitChar = split('.')[0].split('_')[1]
-                l.append(stocks[i])
-                l.append(stocks[j])
-                l.append(r)
-                writer = csv.writer(f)
-                if f.tell() == 0:
-                    writer.writerow(header)
+            temp = 0
+            k=K
+            length = len(data1)
+            while temp!=length:
+                if length-temp<K:
+                    k= length-temp
 
-                writer.writerow(l)
+                data1 = data1[temp:temp+k]
+                data2 = data2[temp:temp+k]
+                data1 = data1.squeeze()
+                data2 = data2.squeeze()
+                r = data1.corr(data2, method='pearson')
+                temp = temp + k
+                if r > R or r < -R:
+                    row = []
+                    m = m + 1
+                    # splitChar = split('.')[0].split('_')[1]
+                    row.append(stocks[i].split('.')[0].split('_')[1])
+                    row.append(stocks[j].split('.')[0].split('_')[1])
+                    row.append(r)
+                    if r > 0 :
+                        status = "UP"
+                    elif r < 0:
+                        status = "DOWN"
+                    else:
+                        status = "NEUTRAL"
+                    row.append(status)
+                    writer = csv.writer(f)
+                    if f.tell() == 0:
+                        writer.writerow(header)
+
+                    writer.writerow(row)
     f.close()
 
 
 if __name__ == '__main__':
     cleanData()
     corelation()
+    print("The result is printed as file_output.csv in the output folder.")
