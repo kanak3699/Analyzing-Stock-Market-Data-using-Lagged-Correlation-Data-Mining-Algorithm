@@ -2,7 +2,7 @@
 
 ## Project Description
 
-In this project, I (Kanak Prajapati) have developed a lagged correlation algorithm for predicting the market direction more accurately when two stocks are strongly correlated to each other with a lag of K number of trading days.
+In this project, I ([Kanak Prajapati](https://github.com/kanak3699)) have developed a lagged correlation algorithm for predicting the market direction more accurately when two stocks are strongly correlated to each other with a lag of K number of trading days.
 
 - Technology Stack
 
