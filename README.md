@@ -1,4 +1,4 @@
-# Analyzing Stock Market Data using Lagged Correlation Data Mining Algorithm.
+# Analyzing Stock Market Data using Lagged Correlation Data Mining Algorithm
 
 ## Project Description
 
